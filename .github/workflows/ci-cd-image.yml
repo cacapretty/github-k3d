@@ -5,7 +5,7 @@ env:
   IMAGE_NAME: "${{ secrets.DOCKER_USER }}/nginx-k3d"
 jobs:
   build-push-image:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted, linux, x64
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
 
   deploy-k3d:
     needs: build-push-image
-    runs-on: ubuntu-latest
+    runs-on: self-hosted, linux, x64
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -37,3 +37,11 @@ jobs:
         run: kubectl apply -f webserver-svc.yaml
       - name: View service
         run: kubectl get services
+
+          - name: Set context
+  run: kubectl config use-context k3d-mycluster
+
+    - name: Set kubeconfig
+  run: |
+    export KUBECONFIG=$(k3d kubeconfig write k3s-default)
+    kubectl get nodes
